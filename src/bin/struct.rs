@@ -4,17 +4,18 @@ struct Rectangle {
     length: u32,
 }
 
+// 为struct实现方法
 impl Rectangle {
-    fn area(&self) -> u32{
+    fn area(&self) -> u32 {
         self.width * self.length
     }
 
-    fn can_hold(&self, other: &Rectangle) ->bool{
-        self.width>other.width && self.length > other.length
+    fn can_hold(&self, other: &Rectangle) -> bool {
+        self.width > other.width && self.length > other.length
     }
-
-    fn square(size: u32) -> Rectangle{
-        Rectangle{
+    // 关联函数
+    fn square(size: u32) -> Rectangle {
+        Rectangle {
             width: size,
             length: size,
         }
@@ -25,15 +26,15 @@ impl Rectangle {
 fn main() {
     let rect1 = Rectangle {
         width: 30,
-        length:50,
+        length: 50,
     };
     let rect2 = Rectangle {
         width: 10,
-        length:20,
+        length: 20,
     };
     let rect3 = Rectangle {
         width: 40,
-        length:60,
+        length: 60,
     };
     // 利用Display trait 打印
     println!("{}", rect1.area());
