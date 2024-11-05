@@ -264,6 +264,8 @@ fn main(){
   - 模块定义时，如果模块名后边是 “;”，而不是代码块：
     - Rust会从与模块同名的文件中加载内容
     - 模块树的结构不会变化
+
+#### Vector
 - Vec<T>,叫做Vector
   - 由标准库提供
   - 可存储多个值
@@ -277,3 +279,341 @@ fn main(){
   - 删除所有元素：使用 clear()
   - retain() 和 drain() 适合批量操作
   - 删除元素时要注意索引范围，越界会导致 panic
+
+#### HashMap
+- 数据存储在heap上
+- 同构的，一个HashMap中，所有的K必须是同一类型，所有的V也必须是同一种类型
+- 在元素类型为 Tuple 的 Vector 上使用 collect方法，可以组建一个HashMap
+  - 要求Tuple有两个值：一个作为K，一个作为V
+  - collect 方法可以把数据整合成很多种集合类型，包括HashMap
+- insert 方法插入键值对到HashMap
+- entry方法：检查指定的K是否对应一个V
+  - 参数为K
+  - 返回 enum Entry：代表值是否存在
+- Entry的 or_insert 方法：
+  - 如果K存在，返回对应的 V 的一个可变引用
+  - 如果K不存在，将方法参数作为 K 的新值插入，返回这个值的可变引用
+- 默认情况下，HashMap使用加密功能强大的Hash函数，可以抵抗拒绝服务（DoS）攻击，不是可用的最快Hash算法，但具有更好的安全性
+- Hash函数决定 HashMap 如何在内存中存放K和V
+- 可以指定不同的Hasher来切换到另一个函数，Hasher是实现BuildHasher trait的类型
+
+#### Option枚举
+```rust
+enum Option<T> {
+  Some(T),
+  None,
+}
+```
+- 定义在标准库中
+- Option<T> 和 T 是不同的类型，若想使用Option<T>中的T，必须将它转换为T
+- 它包含在Prelude（预导入模块）中，可直接使用
+  - Option<T>
+  - Some(T)
+  - None
+
+#### Result 枚举
+- 它包含在Prelude（预导入模块）中，可直接使用
+```rust
+enum Result<T,E> {
+  Ok(T),
+  Err(E),
+}
+```
+- T: 操作成功情况下，Ok变体里返回的数据的类型
+- E: 操作失败情况下，Err变体里返回的错误的类型
+
+#### Rust错误处理
+> [!IMPORTANT] panic!
+- 当panic发生
+  - 默认情况：
+    - 程序会打印一个错误信息
+    - 程序展开调用栈(工作量大)，Rust沿着调用栈往回走，清理每个遇到的函数中的数据
+    - 退出程序
+  - 立即中止调用栈
+    - 不进行清理，直接停止程序
+    - 内存需要 OS 进行清理
+- 想让二进制文件更小，把设置从 “展开” 改为 “中止”
+  - 在Cargo.toml中适当的profile部分设置
+    - panic = ‘abort’
+- 通过设置环境变量RUST_BACKTRACE可得到回溯信息
+- 为了获取带有调试信息的回溯，必须启用调试符号(不带 --release)
+- ```set RUST_BACKTRACE=1 && cargo run```
+
+> [!IMPORTANT] unwrap
+- match表达式的一个快捷方法
+  - 如果 Result 结果是Ok，返回Ok里面的值
+  - 如果 Result 结果是Err，调用panic!宏
+  
+> [!IMPORTANT] expect
+- 与 unwrap 类似，但可指定错误信息
+
+> [!IMPORTANT] ？
+- ？运算符可作为传播错误的一种快捷方式
+- 如果Result是Ok：Ok中的值就是 <b>表达式</b> 的结果，然后继续执行程序
+- 如果Result是Err：Err就是 <b>整个函数</b> 的返回值，就像使用了return
+- Trait std::convert::From 上的from函数，主要用于错误之间的转换
+- 被 ？所应用的错误，会隐式的被from函数处理
+- 当 ？调用from函数时，它所接收的错误类型会被转化为当前函数返回类型所定义的错误类型
+- ？运算符只能用于返回结果类型是 Result or Option or implements `Try`的函数
+- 适用于针对不同错误原因，返回同一种错误类型
+  - 只要每个错误类型实现了转换为所返回的错误类型的from函数
+
+#### 泛型
+关键点：
+1. 泛型提供了代码重用的能力
+2. 使用 trait 约束来限制类型必须实现的功能
+3. where 子句可以使复杂约束更清晰
+4. 泛型在编译时会被单态化，没有运行时开销
+5. 可以为特定类型实现特定的行为
+- 基本语法：
+```rust
+// T 是类型参数
+fn function_name<T>(parameter: T) -> T {
+    // 函数体
+}
+
+// 实际使用
+fn main() {
+    let result = function_name(42);       // T 是 i32
+    let result = function_name("hello");  // T 是 &str
+}
+```
+- 多个类型参数：
+```rust
+// 多个泛型参数用逗号分隔
+fn print_pair<T, U>(t: T, u: U) {
+    println!("Pair: {:?}, {:?}", t, u);
+}
+
+fn main() {
+    print_pair(1, "hello");    // T 是 i32, U 是 &str
+    print_pair(true, 42.0);    // T 是 bool, U 是 f64
+}
+```
+- 带约束的泛型：
+```rust
+// T 必须实现 Display trait
+fn print<T: std::fmt::Display>(value: T) {
+    println!("Value is: {}", value);
+}
+
+// 多个约束使用 + 
+fn print_debug<T: std::fmt::Display + std::fmt::Debug>(value: T) {
+    println!("Value is: {} or {:?}", value, value);
+}
+
+// where 语法（更清晰的约束写法）
+fn complex_function<T, U>(t: T, u: U) -> i32 
+where 
+    T: std::fmt::Display,
+    U: Clone + std::fmt::Debug,
+{
+    println!("T: {}", t);
+    println!("U: {:?}", u);
+    42
+}
+```
+- 泛型结构体和方法：
+```rust
+// 泛型结构体
+struct Point<T> {
+    x: T,
+    y: T,
+}
+
+// 为泛型结构体实现方法
+impl<T> Point<T> {
+    fn new(x: T, y: T) -> Self {
+        Point { x, y }
+    }
+}
+
+// 为特定类型实现方法
+impl Point<f64> {
+    fn distance_from_origin(&self) -> f64 {
+        (self.x.powi(2) + self.y.powi(2)).sqrt()
+    }
+}
+```
+- 泛型枚举：
+```rust
+enum Result<T, E> {
+    Ok(T),
+    Err(E),
+}
+
+enum Option<T> {
+    Some(T),
+    None,
+}
+```
+
+#### trait
+关键点：
+1. trait 定义了类型可以实现的行为
+2. 可以为任何类型实现任何 trait（遵循孤儿规则）
+3. trait 可以有默认实现
+4. trait 默认实现的方法可以调用trait中其它的方法，即使这些方法没有默认实现
+5. trait 可以作为参数和返回值 
+6. trait 对象提供了运行时多态 
+7. 可以组合多个 trait 
+8. trait 可以继承
+
+- 基本定义和实现
+```rust
+// 定义 trait
+trait Animal {
+    // 必须实现的方法
+    fn make_sound(&self) -> String;
+    
+    // 带默认实现的方法
+    fn description(&self) -> String {
+        String::from("这是一个动物")
+    }
+}
+
+// 为结构体实现 trait
+struct Dog {
+    name: String
+}
+
+impl Animal for Dog {
+    fn make_sound(&self) -> String {
+        String::from("汪汪!")
+    }
+    
+    // 可以覆盖默认实现
+    fn description(&self) -> String {
+        format!("这是一只叫{}的狗", self.name)
+    }
+}
+```
+- trait 作为参数
+```rust
+// 接受任何实现了 Animal trait 的类型
+fn pet_animal(animal: &impl Animal) {
+    println!("声音: {}", animal.make_sound());
+}
+
+// 使用 trait bound 语法（等价写法）
+fn pet_animal_bound<T: Animal>(animal: &T) {
+    println!("声音: {}", animal.make_sound());
+}
+
+// 多个 trait 约束
+fn examine(animal: &(impl Animal + std::fmt::Debug)) {
+    println!("检查动物: {:?}", animal);
+}
+
+fn examine1<T: Animal + std::fmt::Debug>(animal: T) {
+  println!("检查动物: {:?}", animal);
+}
+
+fn examine1<T>(animal: T)
+where
+    T: Animal + std::fmt::Debug,
+{
+  println!("检查动物: {:?}", animal);
+}
+
+```
+- trait 继承
+```rust
+trait Animal {
+    fn make_sound(&self) -> String;
+}
+
+// Pet trait 继承 Animal trait
+trait Pet: Animal {
+    fn name(&self) -> String;
+}
+
+struct Dog {
+    dog_name: String
+}
+
+// 实现 Pet trait 必须同时实现 Animal trait
+impl Animal for Dog {
+    fn make_sound(&self) -> String {
+        String::from("汪汪!")
+    }
+}
+
+impl Pet for Dog {
+    fn name(&self) -> String {
+        self.dog_name.clone()
+    }
+}
+```
+- 泛型trait
+```rust
+trait Converter<T> {
+  fn convert(&self) -> T;
+}
+
+struct Celsius(f64);
+struct Fahrenheit(f64);
+
+impl Converter<Fahrenheit> for Celsius {
+  fn convert(&self) -> Fahrenheit {
+    Fahrenheit(self.0 * 9.0/5.0 + 32.0)
+  }
+}
+```
+- 条件实现
+```rust
+struct Wrapper<T>(Vec<T>);
+
+// 只为实现了 Display 的类型实现 Display
+impl<T: std::fmt::Display> std::fmt::Display for Wrapper<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "[{}]", self.0.join(", "))
+    }
+}
+```
+- 自动实现的trait
+```rust
+// 自动派生常用 trait
+#[derive(Debug, Clone, PartialEq)]
+struct Point {
+    x: i32,
+    y: i32,
+}
+
+// 现在 Point 自动实现了 Debug、Clone 和 PartialEq trait
+```
+
+- 关联类型trait 与 泛型trait
+```rust
+// 使用泛型的 trait
+trait GenericContainer<T> {
+    fn add(&mut self, item: T);
+    fn get(&self) -> Option<&T>;
+}
+
+// 使用关联类型的 trait
+trait AssocContainer {
+    type Item;
+    fn add(&mut self, item: Self::Item);
+    fn get(&self) -> Option<&Self::Item>;
+}
+
+// 使用泛型时，可以为同一类型多次实现 trait
+struct MyBox<T>(T);
+
+impl<T> GenericContainer<T> for MyBox<T> {
+    fn add(&mut self, item: T) { self.0 = item; }
+    fn get(&self) -> Option<&T> { Some(&self.0) }
+}
+impl GenericContainer<String> for MyBox<i32> {
+    fn add(&mut self, _item: String) { }
+    fn get(&self) -> Option<&String> { None }
+}
+
+// 使用关联类型时，只能实现一次
+impl<T> AssocContainer for MyBox<T> {
+    type Item = T;
+    fn add(&mut self, item: T) { self.0 = item; }
+    fn get(&self) -> Option<&T> { Some(&self.0) }
+}
+```
