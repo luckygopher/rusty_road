@@ -327,39 +327,39 @@ enum Result<T,E> {
 #### Rust错误处理
 > [!IMPORTANT]
 > panic!
-- 当panic发生
-  - 默认情况：
-    - 程序会打印一个错误信息
-    - 程序展开调用栈(工作量大)，Rust沿着调用栈往回走，清理每个遇到的函数中的数据
-    - 退出程序
-  - 立即中止调用栈
-    - 不进行清理，直接停止程序
-    - 内存需要 OS 进行清理
-- 想让二进制文件更小，把设置从 “展开” 改为 “中止”
-  - 在Cargo.toml中适当的profile部分设置
-    - panic = ‘abort’
-- 通过设置环境变量RUST_BACKTRACE可得到回溯信息
-- 为了获取带有调试信息的回溯，必须启用调试符号(不带 --release)
-- ```set RUST_BACKTRACE=1 && cargo run```
+> - 当panic发生
+>   - 默认情况：
+>     - 程序会打印一个错误信息
+>     - 程序展开调用栈(工作量大)，Rust沿着调用栈往回走，清理每个遇到的函数中的数据
+>     - 退出程序
+>   - 立即中止调用栈
+>     - 不进行清理，直接停止程序
+>     - 内存需要 OS 进行清理
+> - 想让二进制文件更小，把设置从 “展开” 改为 “中止”
+>   - 在Cargo.toml中适当的profile部分设置
+>     - panic = ‘abort’
+> - 通过设置环境变量RUST_BACKTRACE可得到回溯信息
+> - 为了获取带有调试信息的回溯，必须启用调试符号(不带 --release)
+> - ```set RUST_BACKTRACE=1 && cargo run```
 
 > [!IMPORTANT] unwrap
-- match表达式的一个快捷方法
-  - 如果 Result 结果是Ok，返回Ok里面的值
-  - 如果 Result 结果是Err，调用panic!宏
+> - match表达式的一个快捷方法
+>   - 如果 Result 结果是Ok，返回Ok里面的值
+>   - 如果 Result 结果是Err，调用panic!宏
   
 > [!IMPORTANT] expect
-- 与 unwrap 类似，但可指定错误信息
+> - 与 unwrap 类似，但可指定错误信息
 
 > [!IMPORTANT] ？
-- ？运算符可作为传播错误的一种快捷方式
-- 如果Result是Ok：Ok中的值就是 <b>表达式</b> 的结果，然后继续执行程序
-- 如果Result是Err：Err就是 <b>整个函数</b> 的返回值，就像使用了return
-- Trait std::convert::From 上的from函数，主要用于错误之间的转换
-- 被 ？所应用的错误，会隐式的被from函数处理
-- 当 ？调用from函数时，它所接收的错误类型会被转化为当前函数返回类型所定义的错误类型
-- ？运算符只能用于返回结果类型是 Result or Option or implements `Try`的函数
-- 适用于针对不同错误原因，返回同一种错误类型
-  - 只要每个错误类型实现了转换为所返回的错误类型的from函数
+> - ？运算符可作为传播错误的一种快捷方式
+> - 如果Result是Ok：Ok中的值就是 <b>表达式</b> 的结果，然后继续执行程序
+> - 如果Result是Err：Err就是 <b>整个函数</b> 的返回值，就像使用了return
+> - Trait std::convert::From 上的from函数，主要用于错误之间的转换
+> - 被 ？所应用的错误，会隐式的被from函数处理
+> - 当 ？调用from函数时，它所接收的错误类型会被转化为当前函数返回类型所定义的错误类型
+> - ？运算符只能用于返回结果类型是 Result or Option or implements `Try`的函数
+> - 适用于针对不同错误原因，返回同一种错误类型
+>   - 只要每个错误类型实现了转换为所返回的错误类型的from函数
 
 #### 泛型
 关键点：
