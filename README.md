@@ -184,6 +184,7 @@ msg = Message::Write("hello")
 ```
 
 > [!IMPORTANT]
+> 
 > 1. 模式匹配是获取枚举值的主要方式
 >    - 使用 match 表达式
 >    - 使用 if let 语法（适用于只关心一个变体的情况）
@@ -205,7 +206,8 @@ n if condition => expression
 └── 绑定变量
 ```
 
-> [!IMPORTANT] 注意事项
+> [!IMPORTANT] 
+> 注意事项
 > 1. 匹配是按顺序的，第一个匹配的分支会被执行
 > 2. 守卫条件可以访问匹配模式中绑定的变量
 > 3. 在分支的代码块中可以继续使用这个绑定的变量
@@ -323,7 +325,8 @@ enum Result<T,E> {
 - E: 操作失败情况下，Err变体里返回的错误的类型
 
 #### Rust错误处理
-> [!IMPORTANT] panic!
+> [!IMPORTANT]
+> panic!
 - 当panic发生
   - 默认情况：
     - 程序会打印一个错误信息
