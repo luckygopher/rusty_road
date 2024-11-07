@@ -342,15 +342,18 @@ enum Result<T,E> {
 > - 为了获取带有调试信息的回溯，必须启用调试符号(不带 --release)
 > - ```set RUST_BACKTRACE=1 && cargo run```
 
-> [!IMPORTANT] unwrap
+> [!IMPORTANT] 
+> unwrap
 > - match表达式的一个快捷方法
 >   - 如果 Result 结果是Ok，返回Ok里面的值
 >   - 如果 Result 结果是Err，调用panic!宏
   
-> [!IMPORTANT] expect
+> [!IMPORTANT]
+> expect
 > - 与 unwrap 类似，但可指定错误信息
 
-> [!IMPORTANT] ？
+> [!IMPORTANT]
+> ？
 > - ？运算符可作为传播错误的一种快捷方式
 > - 如果Result是Ok：Ok中的值就是 <b>表达式</b> 的结果，然后继续执行程序
 > - 如果Result是Err：Err就是 <b>整个函数</b> 的返回值，就像使用了return
